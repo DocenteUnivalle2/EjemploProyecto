@@ -22,14 +22,24 @@ class UsersController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')],
-            'password' => ['required', 'string', 'min:8'],
-        ]);
+        $validated = $this->validateUser($request);
 
         User::create($validated);
 
         return redirect()->route('users.index');
+    }
+
+    private function validateUser(Request $request, $userId = null)
+    {
+        return $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users')->ignore($userId),
+            ],
+            'password' => ['nullable', 'string', 'min:8'],
+        ]);
     }
 }
